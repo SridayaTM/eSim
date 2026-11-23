@@ -1,5 +1,5 @@
---- /home/sridaya/fossee/eSim/nghdl/install-nghdl.sh	2026-11-20 10:49:47.860428137 +0000
-+++ nghdl/install-nghdl.sh	2026-11-23 04:58:05.796046274 +0000
+--- a/nghdl/install-nghdl.sh
++++ b/nghdl/install-nghdl.sh
 @@ -114,10 +114,10 @@
      NGHDL_CFLAGS=""
  
