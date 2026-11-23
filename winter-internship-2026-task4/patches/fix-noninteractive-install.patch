@@ -1,0 +1,87 @@
+--- eSim/Ubuntu/install-eSim.sh	2026-11-20 10:49:39.241892362 +0000
++++ work/Ubuntu/install-eSim.sh	2026-11-23 13:56:20.875763009 +0000
+@@ -620,6 +620,31 @@
+ log()  { ui_log "$@"; }
+ warn() { ui_warn "$@"; }
+ 
++# --- Non-interactive support -------------------------------------------
++# Without --yes every prompt behaves exactly as before. With it, each
++# prompt takes its documented default and logs the choice, so an
++# unattended run records what was decided on the user's behalf.
++ASSUME_YES=${ESIM_ASSUME_YES:-0}
++for _arg in "$@"; do
++    case "$_arg" in --yes|-y) ASSUME_YES=1 ;; esac
++done
++
++# ask <varname> <ENV_OVERRIDE> <default> <prompt text>
++ask() {
++    local __var=$1 __env=$2 __default=$3 __prompt=$4 __val
++    __val="${!__env:-}"
++    if [ -n "$__val" ]; then
++        log "non-interactive: ${__prompt%%:*} -> $__val (from $__env)"
++    elif [ "$ASSUME_YES" -eq 1 ]; then
++        __val="$__default"
++        log "non-interactive: ${__prompt%%:*} -> $__val (default)"
++    else
++        read -rp "$__prompt" __val
++    fi
++    printf -v "$__var" '%s' "$__val"
++}
++# -----------------------------------------------------------------------
++
+ # die() and error_exit() hand the terminal back BEFORE reporting, so the
+ # report lands on a clean screen rather than inside the scroll region that is
+ # about to be torn down. ui_end is idempotent and safe to call before
+@@ -798,7 +823,7 @@
+     if [ -x /usr/local/bin/ghdl ]; then
+         warn "Found /usr/local/bin/ghdl: $(/usr/local/bin/ghdl --version 2>/dev/null | head -n 1)"
+         warn "It shadows the GHDL this installer sets up (old eSim/nghdl builds put it there)."
+-        read -rp "Remove the /usr/local GHDL? (y/n): " g
++        ask g ESIM_REMOVE_GHDL n "Remove the /usr/local GHDL? (y/n): "
+         if [[ "$g" =~ ^[Yy] ]]; then
+             sudo rm -rf /usr/local/bin/ghdl /usr/local/bin/ghdl1-* \
+                         /usr/local/lib/ghdl /usr/local/include/ghdl*
+@@ -894,7 +919,7 @@
+             return 0
+         fi
+         warn "KiCad $cur installed but older than target major $KICAD_MIN_MAJOR"
+-        read -rp "Remove it and install KiCad >= $KICAD_MIN_MAJOR? (y/n): " r
++        ask r ESIM_REMOVE_KICAD n "Remove it and install KiCad >= $KICAD_MIN_MAJOR? (y/n): "
+         [[ "$r" =~ ^[Yy] ]] || die "Keeping existing KiCad $cur; aborting install."
+         sudo apt-get remove --purge -y kicad kicad-footprints kicad-libraries kicad-symbols kicad-templates
+         sudo apt-get autoremove -y
+@@ -1076,7 +1101,7 @@
+     local script="$eSim_Home/ihp/ihp-install-script.sh"
+     [ -f "$script" ] || { warn "IHP install script not found — skipping"; return 0; }
+ 
+-    read -rp "Install IHP Open PDK for analog IC design? (y/n): " ans
++    ask ans ESIM_IHP n "Install IHP Open PDK for analog IC design? (y/n): "
+     if [[ ! "$ans" =~ ^[Yy] ]]; then
+         log "Skipping IHP Open PDK"
+         return 0
+@@ -1223,7 +1248,7 @@
+ # Proxy prompt (optional)
+ #-----------------------------------------------------------------------------
+ setupProxy() {
+-    read -rp "Is your internet connection behind a proxy? (y/n): " getProxy
++    ask getProxy ESIM_PROXY n "Is your internet connection behind a proxy? (y/n): "
+     if [[ "$getProxy" =~ ^[Yy] ]]; then
+         read -rp  "Proxy hostname: " proxyHostname
+         read -rp  "Proxy port: "     proxyPort
+@@ -1275,11 +1300,16 @@
+ #=============================================================================
+ # Main
+ #=============================================================================
++# --yes / -y is a modifier, not a mode: strip it before the arity check
++# so that "--install --yes" and "--yes --install" both work.
++if [ "${2:-}" = "--yes" ] || [ "${2:-}" = "-y" ]; then set -- "$1"; fi
++if [ "${1:-}" = "--yes" ] || [ "${1:-}" = "-y" ]; then shift; fi
+ if [ "$#" -ne 1 ]; then
+     echo "USAGE:"
+     echo "  ./install-eSim.sh --install"
+     echo "  ./install-eSim.sh --uninstall"
+     echo "  ./install-eSim.sh --dry-run"
++    echo "  (add --yes for a non-interactive run)"
+     exit 1
+ fi
+ option="$1"

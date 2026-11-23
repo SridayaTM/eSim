@@ -1,0 +1,26 @@
+Python 3.13.3
+=========================== short test summary info ============================
+ERROR src/maker/tests/test_backend_isolation.py
+ERROR src/maker/tests/test_dcosim_build.py
+ERROR src/maker/tests/test_dcosim_simulation.py
+ERROR src/maker/tests/test_generated_buffers.py
+ERROR src/maker/tests/test_makerchip_wrapper.py
+ERROR src/maker/tests/test_model_generation_build.py
+ERROR src/maker/tests/test_model_generation_config.py
+ERROR src/maker/tests/test_ngveri_event_ptrs.py
+ERROR src/maker/tests/test_ngveri_remove_async.py
+ERROR src/maker/tests/test_paste_and_convert.py
+ERROR src/maker/tests/test_port_parsing.py
+ERROR src/maker/tests/test_stderr_diagnostics.py
+ERROR src/maker/tests/test_verilog_identity.py
+ERROR src/ngspiceSimulation/tests/test_console_migration.py
+ERROR src/ngspiceSimulation/tests/test_data_extraction.py
+ERROR src/ngspiceSimulation/tests/test_dcosim_restage.py
+ERROR src/ngspiceSimulation/tests/test_empty_placeholder.py
+ERROR src/ngspiceSimulation/tests/test_math_utils.py
+ERROR src/ngspiceSimulation/tests/test_ngspice_widget.py
+ERROR src/ngspiceSimulation/tests/test_plot_hidpi.py
+ERROR src/ngspiceSimulation/tests/test_plot_window_theme.py
+ERROR src/ngspiceSimulation/tests/test_stacked_perf.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 22 errors during collection !!!!!!!!!!!!!!!!!!!
+2 skipped, 22 errors in 4.02s

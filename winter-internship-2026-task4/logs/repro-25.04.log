@@ -1,0 +1,13 @@
+
+=== eSim EDA Suite v2.6 -- FOSSEE, IIT Bombay ===
+    Ubuntu 25.04 - KiCad 8+ via universe
+
+
+>>> Logging to /logs/eSim-install.log
+
+=== Installation failed ===
+  Failed at    step 0/11 (pre-flight)
+  Full log     /logs/eSim-install.log
+  Retry        ./install-eSim.sh --install  (safe: keeps what installed)
+
+EXIT=1

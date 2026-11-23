@@ -1,0 +1,33 @@
+
+=== eSim EDA Suite v2.6 -- FOSSEE, IIT Bombay ===
+    Ubuntu 25.04 - KiCad 8+ via universe
+
+
+>>> Logging to /logs/eSim-install.log
+
+>>> Installing without proxy
+
+>>> [1/11] Clearing artifacts of older eSim installs
+
+>>> Checking for artifacts of an older eSim install
+    done (0m00s)
+
+>>> [2/11] Writing eSim configuration
+
+>>> Writing /logs/.esim/config.ini
+    done (0m00s)
+
+>>> [3/11] Installing system packages and virtualenv
+
+>>> Updating apt index
+Ubuntu/install-eSim.sh: line 833: sudo: command not found
+
+>>> Installing base system packages
+Ubuntu/install-eSim.sh: line 837: sudo: command not found
+
+=== Installation failed ===
+  Failed at    step 3/11 Installing system packages and virtualenv
+  Full log     /logs/eSim-install.log
+  Retry        ./install-eSim.sh --install  (safe: keeps what installed)
+
+EXIT=127
