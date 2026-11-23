@@ -415,9 +415,17 @@ against upstream `installers` reflects that choice, not unrelated work.
 
 ## Files
 
+Both fixes are applied to the source files on this branch:
+
+- `nghdl/install-nghdl.sh` — Issue 1, two lines in `detect_profile()`
+- `Ubuntu/install-eSim.sh` — Issue 2, `--yes` flag and the `ask()` helper
+
+The same changes are also provided as standalone diffs, applicable with
+`patch -p1` from the repository root:
+
 ```
 winter-internship-2026-task4/
 ├── README.md        this report
-├── patches/         both fixes, unified diff
-└── logs/            every run referenced above, indexed in logs/README.md
+├── patches/         both fixes as unified diffs
+└── logs/            every run referenced above
 ```
