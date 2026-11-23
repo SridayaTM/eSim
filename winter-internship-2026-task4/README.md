@@ -51,8 +51,8 @@ current download and the first release to claim 25.04.
 
 **Why containers and not VirtualBox.** Every run starts from an identical clean
 state, which matters when attributing a failure to one cause. The defect is an
-apt archive-level failure, demonstrated below not to be a container artefact.
-GUI runtime was not tested; see [Limitations](#limitations).
+apt archive-level failure, shown below with a direct archive query. GUI runtime
+was not tested; see [Limitations](#limitations).
 
 ---
 
@@ -113,10 +113,33 @@ replacement binary exists.
 
 ### This is not a container artefact
 
-The obvious objection is that `universe` was not enabled. It was. Step 5 of the
-same failing run installed KiCad 8 from universe in 1m54s, which is exactly
-what `detect_profile()` specifies for 25.04 (`KICAD_SOURCE="universe"`). The
-repository was enabled and working. The package is genuinely absent.
+The obvious objection is that `universe` was not enabled. A direct archive query
+on the same release settles it:
+
+```
+$ apt-cache policy libcanberra-gtk-module libcanberra-gtk3-module
+libcanberra-gtk-module:
+  Installed: (none)
+  Candidate: (none)
+  Version table:
+libcanberra-gtk3-module:
+  Installed: (none)
+  Candidate: 0.30-17ubuntu2
+  Version table:
+     0.30-17ubuntu2 500
+        500 http://archive.ubuntu.com/ubuntu plucky/main amd64 Packages
+```
+
+Same archive, same command, same release. The gtk3 module resolves from
+plucky/**main**, which needs no extra repository at all. The gtk2 module has no
+candidate and an empty version table: apt knows the name because another package
+still lists it as a dependency, but no version is published anywhere. That is
+exactly what the installer's error reports when it says the package "is not
+available, but is referred to by another package".
+
+Universe was enabled regardless. Step 5 of the same failing run installed KiCad 8
+from universe in 1m54s, which is what `detect_profile()` specifies for 25.04
+(`KICAD_SOURCE="universe"`).
 
 ### Present in the published release
 
@@ -174,6 +197,9 @@ Step 11 is `runToolchainDoctor`, eSim's own verification. It marks `[OK]` for
 ngspice-45, all eight code models including `ghdl.cm`, the ivlng adapter,
 Icarus Verilog 14.0 with `vvp` and `libvvp`, Verilator 5.032 and GHDL 5.0.1.
 
+The patched run emits no `[WARN]` lines. Every optional dependency the installer
+guards with a warning resolved on 25.04.
+
 ### Prior report
 
 Issue #637, open since 20 August 2026, reports this apt error as item 3 of four.
@@ -184,8 +210,8 @@ It attributes the cause to the package being "obsolete/renamed under Ubuntu
 removed in plucky rather than renamed.
 
 It was filed against a different tree. Its paths (`scripts/setup-esim.sh`,
-`/3rdparty/template/sym-lib-table`, `ghdl-4.1.0.tar.gz`) do not exist in
-current master, and the reporter states they were on branch `installer`.
+`/3rdparty/template/sym-lib-table`, `ghdl-4.1.0.tar.gz`) do not exist in current
+master, and the reporter states they were on branch `installer`.
 `detect_profile()` did not exist in that tree.
 
 The symptom is known. The location and cause in the current unified installer
@@ -281,15 +307,15 @@ All checks passed.
 EXIT=0
 ```
 
-Same stdin condition that killed the unpatched installer at step 0. No
-terminal, no piped answers, no human present. 11/11 and the doctor passes.
+Same stdin condition that killed the unpatched installer at step 0. No terminal,
+no piped answers, no human present. 11/11 and the doctor passes.
 
 ### Still not fully CI-ready
 
 `--yes` handles eSim's own prompts. Two things remain, both under Other
 observations: `sudo` is called unconditionally, and `DEBIAN_FRONTEND` does not
-survive `sudo`. A complete non-interactive mode would resolve `sudo` once with
-a root fallback and pass `DEBIAN_FRONTEND` through to the installer's apt calls.
+survive `sudo`. A complete non-interactive mode would resolve `sudo` once with a
+root fallback and pass `DEBIAN_FRONTEND` through to the installer's apt calls.
 
 ---
 
@@ -297,36 +323,19 @@ a root fallback and pass `DEBIAN_FRONTEND` through to the installer's apt calls.
 
 Not defects for a desktop install. All three affect automated runs.
 
-**`sudo` called unconditionally.** A root environment with no `sudo` binary
-fails at line 833, `sudo: command not found`, exit 127. The usual pattern is to
-resolve sudo once and fall back to empty when already root.
+**`sudo` called unconditionally.** A root environment with no `sudo` binary fails
+at line 833, `sudo: command not found`, exit 127. The usual pattern is to resolve
+sudo once and fall back to empty when already root.
 Evidence: [`repro-25.04-answered.log`](logs/repro-25.04-answered.log)
 
 **`DEBIAN_FRONTEND` does not survive `sudo`.** sudoers defaults to `env_reset`,
 so setting it before running the installer has no effect on its `sudo apt-get`
-calls. Observed as tzdata's geographic-area menu blocking a container run. A
-user who knows the correct variable still gets prompted.
+calls. Observed as tzdata's geographic-area menu blocking a container run. A user
+who knows the correct variable still gets prompted.
 
-**`test_install.sh` step counts disagree.** Its header says twelve install
-steps. Its stub list covers thirteen functions. `INSTALL_STEPS` defines eleven
-numbered steps plus two pre-flight. Not a bug. Three numbers for one thing.
-
-## Test suite
-
-`python3 -m pytest src`, eSim's own suite, run inside eSim's virtualenv after a
-full install.
-
-<!-- REPLACE THE NEXT LINE with the real result from pytest-venv.log -->
-Result: see [`logs/pytest-venv.log`](logs/pytest-venv.log).
-
-Two earlier runs are kept in `logs/` deliberately.
-[`pytest-src.log`](logs/pytest-src.log) and
-[`pytest-after-install.log`](logs/pytest-after-install.log) both show collection
-errors caused by running the suite outside the virtualenv. eSim installs
-`hdlparse`, `watchdog`, `sandpiper` and `volare` into `~/.esim/env`
-(`installDependency`), so the system interpreter cannot import them. Those runs
-say nothing about the code. They are included to show the method, not as
-findings.
+**`test_install.sh` step counts disagree.** Its header says twelve install steps.
+Its stub list covers thirteen functions. `INSTALL_STEPS` defines eleven numbered
+steps plus two pre-flight. Not a bug. Three numbers for one thing.
 
 ## Reproduction
 
@@ -352,33 +361,42 @@ yes n | docker run --rm -i -v "$PWD/eSim-2.6":/esim -e HOME=/logs \
 plain `>>>` output. No `-t` on purpose: the absence of a pseudo-terminal is what
 exposes Issue 2.
 
+The archive query in Issue 1 needs no eSim checkout at all:
+
+```bash
+docker run --rm ubuntu:25.04 bash -c \
+  'apt-get update -qq && apt-cache policy libcanberra-gtk-module libcanberra-gtk3-module'
+```
+
 ## Limitations
 
 Stated so the scope of the claims is clear.
 
-- **The GUI was never launched.** The installer finishes and the toolchain
-  doctor passes. eSim's interface was not started. Installs correctly is not the
-  same as runs correctly.
-- **No VirtualBox run.** Containers only. The apt failure is archive-level and
-  will reproduce on bare metal, but that is reasoning, not a test.
-- **Whether anything needs the GTK2 canberra module at runtime was not
-  checked.** The fix assumes gtk3-only is sufficient because 26.04 already uses
-  it.
+- **No VirtualBox run.** Containers only. The apt failure is archive-level, shown
+  by the `apt-cache policy` query above, and will reproduce on bare metal. That
+  is reasoning from the archive, not a bare-metal test.
+- **Whether anything needs the GTK2 canberra module at runtime was not checked.**
+  The fix assumes gtk3-only is sufficient because 26.04 already uses it.
 - **Whether Issue 2 is already reported.** Searched the issue tracker and open
-  pull requests, found nothing on unattended installs or a `--yes` flag. A
-  search is not proof of absence.
+  pull requests, found nothing on unattended installs or a `--yes` flag. A search
+  is not proof of absence.
+- **The GUI was never launched.** The installer finishes and the toolchain doctor
+  passes. `PyQt6.QtWidgets`, `PyQt6.QtSvg`, `PyQt6.uic` and `PyQt6.Qsci` all
+  import on 25.04, so the installer's Qt package set is correct for the release.
+  eSim's interface was not started. Installs correctly is not the same as runs
+  correctly.
+- **eSim's own pytest suite was not exercised.** The suite needs eSim's
+  virtualenv on `sys.path` plus `pyqt6-dev-tools` for `PyQt6.uic`. With both in
+  place the imports resolve, but the run did not complete within the time
+  available and was stopped. The attempts are kept in `logs/` to show the method.
+  No conclusion is drawn from them. The suite covers the GUI, not the installer.
 
-## Questions for the maintainers
+## Branch
 
-1. Is the GTK2 canberra module needed at all, or can it be dropped for every
-   release rather than per-release?
-2. Is a `--yes` mode wanted upstream? It is the prerequisite for any CI job that
-   runs the real installer, and `Ubuntu/tests/test_install.sh` currently stubs
-   all install steps because the real ones cannot run unattended.
-3. The task document directs submissions to the `installers` branch.
-   `MAINTAINERS-PACKAGING.md` states there is no separate installers branch any
-   more. Files are committed here as instructed. Both patches apply to
-   `master`, where the affected files live.
+The task document directs submissions to the `installers` branch, so the files
+are committed there. `MAINTAINERS-PACKAGING.md` states there is no separate
+installers branch any more. Both patches apply to `master`, where the affected
+files live.
 
 ## Files
 
