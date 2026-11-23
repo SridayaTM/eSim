@@ -394,9 +394,24 @@ Stated so the scope of the claims is clear.
 ## Branch
 
 The task document directs submissions to the `installers` branch, so the files
-are committed there. `MAINTAINERS-PACKAGING.md` states there is no separate
-installers branch any more. Both patches apply to `master`, where the affected
-files live.
+are committed there. Three facts about that branch are worth stating, because
+GitHub reports this fork as far ahead of it.
+
+Upstream `installers` is a separate packaging tree, not a variant of master. It
+holds per-OS folders (`ArchLinux`, `Docker`, `Fedora`, `MacOS`, `Ubuntu`,
+`Windows`) and per-release Ubuntu scripts under `Ubuntu/install-eSim-scripts/`,
+including `install-eSim-25.04.sh`.
+
+That tree is not what eSim 2.6 ships. The published `eSim-2.6.zip` carries the
+unified `install-eSim.sh` with `detect_profile()`, and its `install-nghdl.sh` is
+byte-identical to master at `d86c189`. No Ubuntu script on upstream `installers`
+references `libcanberra` at all, so neither affected file nor the defect exists
+there. `MAINTAINERS-PACKAGING.md` in master likewise states there is no separate
+installers branch any more.
+
+The submission branch was therefore created from `master`, which is where both
+affected files live and where both patches apply. The large ahead/behind count
+against upstream `installers` reflects that choice, not unrelated work.
 
 ## Files
 
