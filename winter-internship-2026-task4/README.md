@@ -1,3 +1,8 @@
+> **FOSSEE Winter Internship 2026, Screening Task 4 submission.**
+> Report, patches and run logs:
+> [`winter-internship-2026-task4/`](winter-internship-2026-task4/README.md)
+>
+> 
 # eSim 2.6 on Ubuntu 25.04: installation failure, root cause, fix
 
 FOSSEE Winter Internship 2026, Screening Task 4
