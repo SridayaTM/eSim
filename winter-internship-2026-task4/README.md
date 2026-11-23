@@ -9,10 +9,10 @@ FOSSEE Winter Internship 2026, Screening Task 4 · Sridaya T M · Chennai Instit
 as supported. `install-eSim.sh --install` aborts at step 7 of 11 and leaves
 nothing usable. The cause is two lines in a dependency table.
 
-| # | Issue | Severity | Status |
-| --- | --- | --- | --- |
-| 1 | `libcanberra-gtk-module` has no candidate on 25.04, install aborts at 7/11 | Blocks entire install | **Fixed**, 2-line patch, verified |
-| 2 | `--install` cannot run without a terminal | Blocks CI and automated verification | **Fixed**, 87-line patch, verified |
+| # | Issue | File | Severity | Status |
+| --- | --- | --- | --- | --- |
+| 1 | `libcanberra-gtk-module` has no candidate on 25.04, install aborts at 7/11 | `nghdl/install-nghdl.sh` | Blocks entire install | **Fixed**, 2-line patch, verified |
+| 2 | `--install` cannot run without a terminal | `Ubuntu/install-eSim.sh` | Blocks CI and automated verification | **Fixed**, 87-line patch, verified |
 
 Three smaller automation defects are listed under [Other observations](#other-observations).
 
