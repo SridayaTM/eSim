@@ -1,5 +1,5 @@
---- eSim/Ubuntu/install-eSim.sh	2026-11-20 10:49:39.241892362 +0000
-+++ work/Ubuntu/install-eSim.sh	2026-11-23 13:56:20.875763009 +0000
+--- a/Ubuntu/install-eSim.sh
++++ b/Ubuntu/install-eSim.sh
 @@ -620,6 +620,31 @@
  log()  { ui_log "$@"; }
  warn() { ui_warn "$@"; }
