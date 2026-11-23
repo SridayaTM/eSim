@@ -1,8 +1,7 @@
 
 # eSim 2.6 on Ubuntu 25.04: installation failure, root cause, fix
 
-FOSSEE Winter Internship 2026, Screening Task 4
-Sridaya T M · Chennai Institute of Technology · tested 20-23 November 2026
+FOSSEE Winter Internship 2026, Screening Task 4 · Sridaya T M · Chennai Institute of Technology · tested 20-23 November 2026
 
 ---
 
